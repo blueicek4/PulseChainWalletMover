@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+	<RunAsService>false</RunAsService>
+	<RunTest>true</RunTest>
+	<CheckInterval>30</CheckInterval>
+	<StatusInterval>180</StatusInterval>
+	<FromEmail>noreply@bluetech-roma.it</FromEmail>
+	<ToEmail>g.moretti@bluetech-roma.it</ToEmail>
+	<SmtpHost>smtp.office365.com</SmtpHost>
+	<SmtpPort>587</SmtpPort>
+	<SmtpUsername>noreply@bluetech-roma.it</SmtpUsername>
+	<SmtpPassword>Blt@1980</SmtpPassword>
+	<TelegramBotToken>6254913681:AAEshyT-rvwx4vZaYUEmG7YXGoSzFOktKow</TelegramBotToken>
+	<TelegramBotUsername>APRAvengersPulseChainMonitor_bot</TelegramBotUsername>
+	<StartWallet>0x184e6FEAdf1Abe5D31C71F51875870879a555B76</StartWallet>
+	<StartSeed>hold horse eyebrow advice ghost door trumpet return jump attract square chat</StartSeed>
+	<TargetWallet>0x99CA21fE279f5A375eBbB1F8A67e973b704cD2A3</TargetWallet>
+	<Percentage>10%</Percentage>
+	<TelegramChatIds>
+	</TelegramChatIds>
+	<TelegramHourlyIds>
+	</TelegramHourlyIds>
+	<TestnetRpcUrls>
+		<Url>https://rpc.v1.testnet.pulsechain.com/</Url>
+		<Url>https://rpc.v2.testnet.pulsechain.com/</Url>
+		<Url>https://rpc.v2b.testnet.pulsechain.com/</Url>
+		<Url>https://rpc.v3.testnet.pulsechain.com/</Url>
+	</TestnetRpcUrls>
+	<RpcUrls>
+		<Url>https://rpc.pulsechain.com</Url>
+		<Url>https://rpc.mainnet.pulsechain.com</Url>
+		<Url>https://rpc.v4.testnet.pulsechain.com/</Url>
+	</RpcUrls>
+</Configuration>
