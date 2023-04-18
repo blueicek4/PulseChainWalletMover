@@ -28,12 +28,12 @@ namespace Setup
             numCheckInterval.Value = config.CheckInterval;
             numStatusInterval.Value = config.StatusInterval;
 
-            txtTelegramBotToken.Text = config.TelegramBotToken;
-            txtTelegramBotUsername.Text = config.TelegramBotUsername;
-            txtStartWallet.Text = config.StartWallet;
-            txtStartSeed.Text = config.StartSeed;
-            txtTargetWallet.Text = config.TargetWallet;
-            numPercentage.Value = Decimal.Parse(config.Percentage.Replace("%", ""));
+            txtTelegramBotToken.Text = config.TelegramBotToken ?? String.Empty;
+            txtTelegramBotUsername.Text = config.TelegramBotUsername ?? String.Empty;
+            txtStartWallet.Text = config.StartWallet ?? String.Empty;
+            txtStartSeed.Text = config.StartSeed ?? String.Empty;
+            txtTargetWallet.Text = config.TargetWallet ?? String.Empty;
+            numPercentage.Value = Decimal.Parse((config.Percentage ?? "100%").Replace("%", ""));
 
             // Aggiungi una colonna al DataGridView, se non è già presente
             if (grdRpcMain.Columns.Count == 0)
@@ -171,12 +171,6 @@ namespace Setup
         public bool RunAsService { get; set; }
         public int CheckInterval { get; set; }
         public int StatusInterval { get; set; }
-        public string FromEmail { get; set; }
-        public string ToEmail { get; set; }
-        public string SmtpHost { get; set; }
-        public int SmtpPort { get; set; }
-        public string SmtpUsername { get; set; }
-        public string SmtpPassword { get; set; }
         public string TelegramBotToken { get; set; }
         public string TelegramBotUsername { get; set; }
         public string StartWallet { get; set; }

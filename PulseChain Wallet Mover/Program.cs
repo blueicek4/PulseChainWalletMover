@@ -368,61 +368,6 @@ namespace PulseChainWallet
 
         }
 
-        private static bool CheckWebsiteAvailability(string url)
-        {
-            ILog log = LogManager.GetLogger(typeof(PulseChainWorker));
-            using (HttpClient httpClient = new HttpClient())
-            {
-                try
-                {
-                    HttpResponseMessage response = httpClient.GetAsync(url).Result;
-
-                    return response.IsSuccessStatusCode;
-                }
-                catch (Exception ex)
-                {
-                    if (!ex.Message.Contains("Host sconosciuto") && !ex.Message.Contains("nome richiesto è valido"))
-                        log.Error($"Errore nel controllo della disponibilità del sito {url}: {ex.Message}");
-                    return false;
-                }
-            }
-        }
-
-        private static bool CheckDnsEntry(string url)
-        {
-            ILog log = LogManager.GetLogger(typeof(PulseChainWorker));
-            try
-            {
-                Uri uri = new Uri(url);
-                string host = uri.Host;
-                LookupClient dnsClient = new LookupClient(new LookupClientOptions(new[] { System.Net.IPAddress.Parse("8.8.8.8") }) { UseCache = false, Timeout = TimeSpan.FromSeconds(2) });
-                var result = dnsClient.Query(host, QueryType.ANY);
-
-                return result.Answers.Any(record => record.RecordType == ResourceRecordType.A || record.RecordType == ResourceRecordType.AAAA || record.RecordType == ResourceRecordType.CNAME);
-            }
-            catch (Exception ex)
-            {
-                log.Error($"Errore nel controllo dell'entry DNS per {url}: {ex.Message}");
-                return false;
-            }
-        }
-        private static void SendEmail(string from, string to, string subject, string body)
-        {
-            Configuration config = Configuration.LoadFromFile("configurazione.xml");
-
-            using (MailMessage mail = new MailMessage(from, to))
-            {
-                mail.Subject = subject;
-                mail.Body = body;
-
-                using (SmtpClient smtp = new SmtpClient(config.SmtpHost, config.SmtpPort))
-                {
-                    smtp.Credentials = new System.Net.NetworkCredential(config.SmtpUsername, config.SmtpPassword);
-                    smtp.EnableSsl = true;
-                    smtp.Send(mail);
-                }
-            }
-        }
         private static async Task SendTelegramMessage(string botToken, SerializableDictionary<long, int> chatIds, string message)
         {
             ILog log = LogManager.GetLogger(typeof(PulseChainWorker));
@@ -437,30 +382,6 @@ namespace PulseChainWallet
                 }
             }
         }
-        /*
-        public static string GetAllWebsitesStatus(Dictionary<string, bool> websiteStatus)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            foreach (KeyValuePair<string, bool> entry in websiteStatus.OrderByDescending(k => k.Value))
-            {
-                sb.AppendLine($"{(entry.Value ? "\U0001F7E2" : "\U0001F534")} {entry.Key.EscapeMarkdownV2()}");
-            }
-
-            return sb.ToString();
-        }
-        public static string GetAllDnsStatus(Dictionary<string, bool> dnsStatus)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            foreach (KeyValuePair<string, bool> entry in dnsStatus.OrderByDescending(k => k.Value))
-            {
-                sb.AppendLine($"{(entry.Value ? "\U0001F7E2" : "\U0001F534")} {entry.Key.EscapeMarkdownV2()}");
-            }
-
-            return sb.ToString();
-        }
-        */
     }
     public class MessageHandler
     {
@@ -697,12 +618,6 @@ namespace PulseChainWallet
         public bool RunAsService { get; set; }
         public int CheckInterval { get; set; }
         public int StatusInterval { get; set; }
-        public string FromEmail { get; set; }
-        public string ToEmail { get; set; }
-        public string SmtpHost { get; set; }
-        public int SmtpPort { get; set; }
-        public string SmtpUsername { get; set; }
-        public string SmtpPassword { get; set; }
         public string TelegramBotToken { get; set; }
         public string TelegramBotUsername { get; set; }
         public string StartWallet { get; set; }
