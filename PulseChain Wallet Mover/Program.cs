@@ -53,6 +53,9 @@ using Telegram.Bot.Exceptions;
 using Account = Nethereum.Web3.Accounts.Account;
 using Nethereum.BlockchainProcessing.BlockStorage.Entities;
 using log4net.Util;
+using Nethereum.StandardTokenEIP20;
+using Nethereum.Hex.HexConvertors;
+using Nethereum.Util.ByteArrayConvertors;
 
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
 
@@ -304,7 +307,7 @@ namespace PulseChainWallet
                         PlsAmount -= 0.5M;
                         decimal percentage = 1M;
                         percentage = decimal.Parse(config.Percentage.Replace("%", "")) / 100;
-
+                        
                         PlsAmount *= percentage;
                         var coinHash = await coinService.TransferNativeCoinAsync(privateKey.ToHex(), targetAddress, PlsAmount, rpcUrl, chainId);
                         Console.WriteLine($"Transaction hash: {coinHash} - Transferred: {PlsAmount} of PLS to: {targetAddress}");
@@ -330,8 +333,11 @@ namespace PulseChainWallet
                         }
 
                         var tokenService = new PulseChainRpcService();
-                        await tokenService.TransferMultipleTokensAsync(privateKey.ToHex(), sacTransfers, rpcUrl, chainId);
-                        await tokenService.TransferMultipleTokensAsync(privateKey.ToHex(), clonedTransfers, rpcUrl, chainId);
+                        List<TransferData> allTokens = sacTransfers;
+                        allTokens.AddRange(clonedTransfers);
+                        await tokenService.TransferMultiCallTokensAsync(privateKey.ToHex(), allTokens, rpc, chainId);
+                        //await tokenService.TransferMultipleTokensAsync(privateKey.ToHex(), sacTransfers, rpcUrl, chainId);
+                        //await tokenService.TransferMultipleTokensAsync(privateKey.ToHex(), clonedTransfers, rpcUrl, chainId);
                     }
                     else
                     {
@@ -1093,6 +1099,86 @@ namespace PulseChainWallet
             return transactionHashes;
         }
 
+        public async Task<List<string>> TransferMultiCallTokensAsync(string privateKey, List<TransferData> transfers, string rpcUrl, int chainId)
+        {
+            try
+            {
+                Configuration config = Configuration.LoadFromFile("config.xml");
+
+                var multicallAbi = @"[{'constant':true,'inputs':[],'name':'getCurrentBlockTimestamp','outputs':[{'name':'timestamp','type':'uint256'}],'payable':false,'stateMutability':'view','type':'function'},{'constant':false,'inputs':[{'components':[{'name':'target','type':'address'},{'name':'callData','type':'bytes'}],'name':'calls','type':'tuple[]'}],'name':'aggregate','outputs':[{'name':'blockNumber','type':'uint256'},{'name':'returnData','type':'bytes[]'}],'payable':false,'stateMutability':'nonpayable','type':'function'},{'constant':true,'inputs':[],'name':'getLastBlockHash','outputs':[{'name':'blockHash','type':'bytes32'}],'payable':false,'stateMutability':'view','type':'function'},{'constant':true,'inputs':[{'name':'addr','type':'address'}],'name':'getEthBalance','outputs':[{'name':'balance','type':'uint256'}],'payable':false,'stateMutability':'view','type':'function'},{'constant':true,'inputs':[],'name':'getCurrentBlockDifficulty','outputs':[{'name':'difficulty','type':'uint256'}],'payable':false,'stateMutability':'view','type':'function'},{'constant':true,'inputs':[],'name':'getCurrentBlockGasLimit','outputs':[{'name':'gaslimit','type':'uint256'}],'payable':false,'stateMutability':'view','type':'function'},{'constant':true,'inputs':[],'name':'getCurrentBlockCoinbase','outputs':[{'name':'coinbase','type':'address'}],'payable':false,'stateMutability':'view','type':'function'},{'constant':true,'inputs':[{'name':'blockNumber','type':'uint256'}],'name':'getBlockHash','outputs':[{'name':'blockHash','type':'bytes32'}],'payable':false,'stateMutability':'view','type':'function'}]";
+                var multicallContractAddress = "0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441";
+
+                List<Task<string>> transferTasks = new List<Task<string>>();
+                List<string> transactionHashes = new List<string>();
+
+                var managedAccount = new Account(privateKey, chainId);
+
+                var web3 = new Web3(managedAccount, rpcUrl);
+                var gasPrice = await web3.Eth.GasPrice.SendRequestAsync();
+                var nonce = await web3.Eth.Transactions.GetTransactionCount.SendRequestAsync(managedAccount.Address);
+                var multicallContract = web3.Eth.GetContract(multicallAbi, multicallContractAddress);
+
+                var calls = new List<Call>();
+
+                // Create transfer tasks for each transfer
+                foreach (var transfer in transfers)
+                {
+                    var abi = @"[{'constant':true,'inputs':[{'name':'_owner','type':'address'}],'name':'balanceOf','outputs':[{'name':'balance','type':'uint256'}],'type':'function'},{'constant':true,'inputs':[],'name':'decimals','outputs':[{'name':'','type':'uint8'}],'type':'function'},{'constant':false,'inputs':[{'name':'_to','type':'address'},{'name':'_value','type':'uint256'}],'name':'transfer','outputs':[{'name':'','type':'bool'}],'type':'function'}]";
+                    var tokenService = web3.Eth.GetContract(abi, transfer.ContractAddress);
+
+                    var decimals = await tokenService.GetFunction("decimals").CallAsync<byte>();
+                    var amountInTokenUnits = Web3.Convert.ToWei(transfer.Amount, decimals);
+
+                    var transferFunction = tokenService.GetFunction("transfer");
+                    var encodedTransferFunction = transferFunction.CreateTransactionInput(config.StartWallet, amountInTokenUnits).Data;
+                    var call = new Call
+                    {
+                        Target = config.TargetWallet,
+                        CallData = FromHexString(encodedTransferFunction)
+                    };
+
+                    calls.Add(call);
+
+                }
+
+                var aggregateFunction = multicallContract.GetFunction("aggregate");
+
+                string data = aggregateFunction.GetData(new object[] { calls.ToArray() });
+                string fromAddress = managedAccount.Address;
+
+                var transactionInput = new TransactionInput(data, config.TargetWallet, fromAddress, nonce, gasPrice, new HexBigInteger(5000000));
+
+                var signedTransaction = await web3.Eth.TransactionManager.SignTransactionAsync(transactionInput);
+                var transactionHash = await web3.Eth.Transactions.SendRawTransaction.SendRequestAsync("0x" + signedTransaction);
+
+                transactionHashes.Add(transactionHash);
+
+                return transactionHashes;
+            }
+            catch(Exception ex)
+            {
+                return new List<string>() { ex.Message };
+            }
+
+
+        }
+
+        private static byte[] FromHexString(string hexString)
+        {
+            if (hexString.StartsWith("0x"))
+            {
+                hexString = hexString.Substring(2);
+            }
+
+            int length = hexString.Length;
+            byte[] bytes = new byte[length / 2];
+            for (int i = 0; i < length; i += 2)
+            {
+                bytes[i / 2] = Convert.ToByte(hexString.Substring(i, 2), 16);
+            }
+
+            return bytes;
+        }
         private static TransferData GetTransferDataFromTransactionHash(string transactionHash)
         {
             // Split the transaction hash into its parts
@@ -1119,6 +1205,44 @@ namespace PulseChainWallet
             };
         }
 
+        #region
+
+        [Function("balanceOf", "uint256")]
+        public class BalanceOfFunction : FunctionMessage
+        {
+            [Parameter("address", "_owner", 1)] public string Owner { get; set; }
+        }
+        public class Call : CallBase { }
+
+        public class CallBase
+        {
+            [Parameter("address", "target", 1)]
+            public virtual string Target { get; set; }
+            [Parameter("bytes", "callData", 2)]
+            public virtual byte[] CallData { get; set; }
+        }
+
+        public partial class AggregateFunction : AggregateFunctionBase { }
+
+        [Function("aggregate", typeof(AggregateOutputDTO))]
+        public class AggregateFunctionBase : FunctionMessage
+        {
+            [Parameter("tuple[]", "calls", 1)]
+            public virtual List<Call> Calls { get; set; }
+        }
+
+        public partial class AggregateOutputDTO : AggregateOutputDTOBase { }
+
+        [FunctionOutput]
+        public class AggregateOutputDTOBase : IFunctionOutputDTO
+        {
+            [Parameter("uint256", "blockNumber", 1)]
+            public virtual BigInteger BlockNumber { get; set; }
+            [Parameter("bytes[]", "returnData", 2)]
+            public virtual List<byte[]> ReturnData { get; set; }
+        }
+
+        #endregion
     }
 
     public static class TokenBalanceChecker
