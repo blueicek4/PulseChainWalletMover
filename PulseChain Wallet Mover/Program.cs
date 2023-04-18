@@ -237,6 +237,7 @@ namespace PulseChainWallet
                         Console.WriteLine($"{DateTime.Now.ToShortTimeString()} THE FOLLOWING RPC SERVER IS ONLINE: {rpc} - CHAIN ID IS: {_chainId} - STARTING TRANSFER!");
                         cicle = false;
                         var pulseChainScannerApi = new PulseChainScannerApi();
+                        pulseChainScannerApi.HttpClient = new HttpClient() { BaseAddress = new Uri(rpc.Replace("rpc", "scan")) };
                         var startAddress = config.StartWallet;
                         var targetAddress = config.TargetWallet;
                         string mnemonicPhrase = config.StartSeed;
@@ -882,11 +883,14 @@ namespace PulseChainWallet
 
     public class PulseChainScannerApi
     {
-        private static readonly HttpClient HttpClient = new HttpClient
+        public HttpClient HttpClient { get; set; }
+        public PulseChainScannerApi()
         {
-            BaseAddress = new Uri("https://scan.v3.testnet.pulsechain.com")
-        };
-
+            HttpClient = new HttpClient
+            {
+                BaseAddress = new Uri("https://scan.mainnet.pulsechain.com")
+            };
+        }
         public async Task<List<TokenInfo>> GetTokensOwnedByAddressAsync(string address)
         {
             var response = await HttpClient.GetAsync($"/api?module=account&action=tokenlist&address={address}");
