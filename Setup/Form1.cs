@@ -3,6 +3,7 @@ using System.Xml.Schema;
 using System.Xml.Serialization;
 using System.Xml;
 using System.Windows.Forms;
+using System.Configuration;
 
 namespace Setup
 {
@@ -32,6 +33,7 @@ namespace Setup
             txtTelegramBotUsername.Text = config.TelegramBotUsername ?? String.Empty;
             txtStartWallet.Text = config.StartWallet ?? String.Empty;
             txtStartSeed.Text = config.StartSeed ?? String.Empty;
+            txtStartPrivateKey.Text = config.StartPrivateKey ?? String.Empty;
             txtTargetWallet.Text = config.TargetWallet ?? String.Empty;
             numPercentage.Value = Decimal.Parse((config.Percentage ?? "100%").Replace("%", ""));
 
@@ -96,7 +98,7 @@ namespace Setup
 
         private void SaveConfig()
         {
-            Configuration config = new Configuration();
+            Configuration config = Configuration.LoadFromFile("config.xml");
 
             config.RunTest =chkRunTest.Checked;
             config.RunAsService=chkRunAsService.Checked;
@@ -107,6 +109,7 @@ namespace Setup
             config.TelegramBotUsername = txtTelegramBotUsername.Text;
             config.StartWallet = txtStartWallet.Text;
             config.StartSeed = txtStartSeed.Text;
+            config.StartPrivateKey = txtStartPrivateKey.Text;
             config.TargetWallet = txtTargetWallet.Text;
             config.Percentage = Convert.ToInt32(numPercentage.Value).ToString() + "%";
             config.RpcUrls = new List<string>();
@@ -186,6 +189,8 @@ namespace Setup
         [XmlArray("TestnetRpcUrls")]
         [XmlArrayItem("Url")]
         public List<string> TestnetRpcUrls { get; set; }
+        public string? StartPrivateKey { get; set; }
+
         public static Configuration LoadFromFile(string filePath)
         {
             string fullPath;

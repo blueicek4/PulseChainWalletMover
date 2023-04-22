@@ -9,21 +9,19 @@
 	<TelegramBotUsername></TelegramBotUsername>
 	<StartWallet>0x0000000000000000000000000000000000000000</StartWallet>
 	<StartSeed>word word word word word word word word word word word </StartSeed>
+	<StartPrivateKey></StartPrivateKey>
 	<TargetWallet>0x0000000000000000000000000000000000000000</TargetWallet>
-	<Percentage>10%</Percentage>
+	<Percentage>100%</Percentage>
 	<TelegramChatIds>
 	</TelegramChatIds>
 	<TelegramHourlyIds>
 	</TelegramHourlyIds>
 	<TestnetRpcUrls>
-		<Url>https://rpc.v1.testnet.pulsechain.com/</Url>
-		<Url>https://rpc.v2.testnet.pulsechain.com/</Url>
 		<Url>https://rpc.v2b.testnet.pulsechain.com/</Url>
-		<Url>https://rpc.v3.testnet.pulsechain.com/</Url>
+		<Url>https://rpc.v4.testnet.pulsechain.com/</Url>
 	</TestnetRpcUrls>
 	<RpcUrls>
 		<Url>https://rpc.pulsechain.com</Url>
 		<Url>https://rpc.mainnet.pulsechain.com</Url>
-		<Url>https://rpc.v4.testnet.pulsechain.com/</Url>
 	</RpcUrls>
 </Configuration>

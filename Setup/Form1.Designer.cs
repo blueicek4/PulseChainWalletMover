@@ -58,6 +58,8 @@
             this.tabPage5 = new System.Windows.Forms.TabPage();
             this.grdClonedTokens = new System.Windows.Forms.DataGridView();
             this.btnSave = new System.Windows.Forms.Button();
+            this.label9 = new System.Windows.Forms.Label();
+            this.txtStartPrivateKey = new System.Windows.Forms.TextBox();
             this.gridRpcTest.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numPercentage)).BeginInit();
@@ -88,6 +90,8 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.txtStartPrivateKey);
+            this.tabPage1.Controls.Add(this.label9);
             this.tabPage1.Controls.Add(this.label8);
             this.tabPage1.Controls.Add(this.button1);
             this.tabPage1.Controls.Add(this.label7);
@@ -118,7 +122,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(333, 259);
+            this.label8.Location = new System.Drawing.Point(333, 231);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(151, 15);
             this.label8.TabIndex = 18;
@@ -156,7 +160,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(333, 230);
+            this.label5.Location = new System.Drawing.Point(333, 202);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(130, 15);
             this.label5.TabIndex = 14;
@@ -214,14 +218,14 @@
             // 
             // txtStartSeed
             // 
-            this.txtStartSeed.Location = new System.Drawing.Point(20, 256);
+            this.txtStartSeed.Location = new System.Drawing.Point(20, 228);
             this.txtStartSeed.Name = "txtStartSeed";
             this.txtStartSeed.Size = new System.Drawing.Size(307, 23);
             this.txtStartSeed.TabIndex = 7;
             // 
             // txtStartWallet
             // 
-            this.txtStartWallet.Location = new System.Drawing.Point(20, 227);
+            this.txtStartWallet.Location = new System.Drawing.Point(20, 199);
             this.txtStartWallet.Name = "txtStartWallet";
             this.txtStartWallet.Size = new System.Drawing.Size(307, 23);
             this.txtStartWallet.TabIndex = 6;
@@ -376,6 +380,22 @@
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(333, 260);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(143, 15);
+            this.label9.TabIndex = 19;
+            this.label9.Text = "Original Wallet PrivateKey";
+            // 
+            // txtStartPrivateKey
+            // 
+            this.txtStartPrivateKey.Location = new System.Drawing.Point(20, 257);
+            this.txtStartPrivateKey.Name = "txtStartPrivateKey";
+            this.txtStartPrivateKey.Size = new System.Drawing.Size(307, 23);
+            this.txtStartPrivateKey.TabIndex = 20;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -435,5 +455,7 @@
         private Button btnSave;
         private DataGridView grdSacTokens;
         private DataGridView grdClonedTokens;
+        private TextBox txtStartPrivateKey;
+        private Label label9;
     }
 }

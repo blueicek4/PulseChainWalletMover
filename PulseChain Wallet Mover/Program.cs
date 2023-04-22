@@ -56,6 +56,11 @@ using log4net.Util;
 using Nethereum.StandardTokenEIP20;
 using Nethereum.Hex.HexConvertors;
 using Nethereum.Util.ByteArrayConvertors;
+using System.Globalization;
+using Microsoft.Extensions.Logging;
+using IPAddress = System.Net.IPAddress;
+using static System.Net.Mime.MediaTypeNames;
+using System.Security.Policy;
 
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
 
@@ -67,9 +72,11 @@ namespace PulseChainWallet
         private static TimeSpan checkInterval = TimeSpan.FromMinutes(3); // Intervallo tra i controlli
         static async Task Main(string[] args)
         {
+            Console.WriteLine("Avvio");
             Configuration config = Configuration.LoadFromFile("config.xml");
+            Console.WriteLine("Config caricato");
             var host = CreateHostBuilder(args).Build();
-
+            Console.WriteLine("Avvia host");
             Boolean console = false;
             if (config.RunAsService)
             {
@@ -80,6 +87,7 @@ namespace PulseChainWallet
             }
             else
             {
+                Console.WriteLine("Eseguo come applicazione");
                 await host.RunAsync();
             }
 
@@ -225,19 +233,42 @@ namespace PulseChainWallet
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            Console.WriteLine("Config caricato");
+
             Configuration config = Configuration.LoadFromFile("config.xml");
+            var cts = new CancellationTokenSource();
+            Console.WriteLine("Avvio Telegram Bot");
+            InitializeTelegramBot(cts.Token);
+            Console.WriteLine("Invio prima notifica Telegram");
+            await Helper.SendTelegramMessage(config.TelegramBotToken, config.TelegramNotificationsIds, $"PulseChain Wallet Mover\nStarting RPC Monitoring");
+            Console.WriteLine("Avvio ciclo");
+
             bool cicle = true;
             while (cicle)
             {
                 config = Configuration.LoadFromFile("config.xml");
                 if (config.RunTest)
+                {
+                    Console.WriteLine("Avvio su Testnet");
                     config.RpcUrls = config.TestnetRpcUrls;
+                }
                 foreach(var rpc in config.RpcUrls)
                 {
+                    Console.WriteLine($"Inizio analisi nodo {rpc}");
+
+                    bool dnsCheck = CheckDnsEntry(rpc);
+                    if (dnsCheck)
+                    {
+                        Console.WriteLine($"{rpc} ha il dns online");
+
+                        await Helper.SendTelegramMessage(config.TelegramBotToken, config.TelegramNotificationsIds, $"\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\n\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\n\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\n\n\n\n**THE DNS {rpc.Replace(".", "\\.")} IS ONLINE**\n\n\n\n\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\n\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\n\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\U000023F0\n\nTRYING TO CONNECT TO THE RPC SERVER");
+                    }
                     string _chainId = await CheckRpcOnline(rpc);
                     if (!String.IsNullOrWhiteSpace(_chainId))
                     {
-                        Console.WriteLine($"{DateTime.Now.ToShortTimeString()} THE FOLLOWING RPC SERVER IS ONLINE: {rpc} - CHAIN ID IS: {_chainId} - STARTING TRANSFER!");
+                        string messageLog = $"{DateTime.Now.ToShortTimeString()} THE FOLLOWING RPC SERVER IS ONLINE {rpc} - CHAIN ID IS {_chainId} - STARTING TRANSFER!";
+                        Console.WriteLine(messageLog);
+                        await Helper.SendTelegramMessage(config.TelegramBotToken, config.TelegramNotificationsIds, messageLog.EscapeMarkdownV2());
                         cicle = false;
                         var pulseChainScannerApi = new PulseChainScannerApi();
                         pulseChainScannerApi.HttpClient = new HttpClient() { BaseAddress = new Uri(rpc.Replace("rpc", "scan")) };
@@ -245,14 +276,21 @@ namespace PulseChainWallet
                         var targetAddress = config.TargetWallet;
                         string mnemonicPhrase = config.StartSeed;
                         string passphrase = String.Empty; // Passphrase is optional, you can leave it as an empty string if you don't have one
+                        string privateKey;
+                        if (String.IsNullOrWhiteSpace(config.StartPrivateKey))
+                        {
+                            // Create a wallet using the mnemonic and passphrase
+                            Wallet wallet = new Wallet(mnemonicPhrase, passphrase);
 
-                        // Create a wallet using the mnemonic and passphrase
-                        Wallet wallet = new Wallet(mnemonicPhrase, passphrase);
+                            // Derive the desired private key using a derivation path
+                            var derivationPath = 0;//"m/44'/60'/0'/0/0"; // Replace with the desired derivation path
+                            privateKey = wallet.GetPrivateKey(derivationPath).ToHex();
+                        }
+                        else
+                        {
+                            privateKey = config.StartPrivateKey;
+                        }
 
-                        // Derive the desired private key using a derivation path
-                        var derivationPath = 0;//"m/44'/60'/0'/0/0"; // Replace with the desired derivation path
-                        var privateKey = wallet.GetPrivateKey(derivationPath);
-                        var publicKey = wallet.GetPublicKey(derivationPath);
                         string rpcUrl = rpc; // Replace with a PulseChain node URL
                         int chainId = Convert.ToInt32(_chainId);
 
@@ -271,7 +309,7 @@ namespace PulseChainWallet
                             }
                         }
 
-                        sactokenInfos = (await TokenBalanceChecker.GetTokenBalancesAsync(startAddress, sactokenInfos, rpcUrl, chainId, privateKey.ToHex()));                      
+                        sactokenInfos = (await TokenBalanceChecker.GetTokenBalancesAsync(startAddress, sactokenInfos, rpcUrl, chainId, privateKey));                      
                         sactokenInfos = sactokenInfos.Where(t => Convert.ToDecimal(t.Balance) > 0).ToList();
 
                         var clonedTokensStrings = System.IO.File.ReadAllLines(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Environment.ProcessPath), "clonedTokens.txt")).ToList();
@@ -287,21 +325,31 @@ namespace PulseChainWallet
                             }
                         }
 
-                        clonedtokenInfos = (await TokenBalanceChecker.GetTokenBalancesAsync(startAddress, clonedtokenInfos, rpcUrl, chainId, privateKey.ToHex()));
+                        clonedtokenInfos = (await TokenBalanceChecker.GetTokenBalancesAsync(startAddress, clonedtokenInfos, rpcUrl, chainId, privateKey));
                         clonedtokenInfos = clonedtokenInfos.Where(t => Convert.ToDecimal(t.Balance) > 0).ToList();
                         var coinService = new PulseChainRpcService();
-                        var PlsAmount = await coinService.GetNativeCoinBalanceAsync(startAddress, rpcUrl, chainId, privateKey.ToHex());
-                        Console.WriteLine($"Native Coin owned by address {startAddress} is {PlsAmount}:\n\n");
+                        var PlsAmount = await coinService.GetNativeCoinBalanceAsync(startAddress, rpcUrl, chainId, privateKey);
+                        string msgPlsTotal = $"Native Coin owned by address {startAddress} is {PlsAmount}";
+                        Console.WriteLine($"Native Coin owned by address {startAddress} is {PlsAmount}\n\n");
+                        await Helper.SendTelegramMessage(config.TelegramBotToken, config.TelegramNotificationsIds, msgPlsTotal.EscapeMarkdownV2());
 
+                        string msgSacTotal = $"SAC Tokens owned by address {startAddress}";
+                        await Helper.SendTelegramMessage(config.TelegramBotToken, config.TelegramNotificationsIds, msgSacTotal.EscapeMarkdownV2());
                         Console.WriteLine($"SAC Tokens owned by address {startAddress}:\n\n");
                         foreach (var token in sactokenInfos)
                         {
-                            Console.WriteLine($"Name: {token.Name}, Symbol: {token.Symbol}, Contract Address: {token.ContractAddress}, Balance: {token.Balance}");
+                            string msgSacLog = $"Name: {token.Name}, Symbol: {token.Symbol}, Contract Address: {token.ContractAddress}, Balance: {token.Balance}";
+                            Console.WriteLine(msgSacLog);
+                            await Helper.SendTelegramMessage(config.TelegramBotToken, config.TelegramNotificationsIds, msgSacLog.EscapeMarkdownV2());
                         }
+                        string msgClonedTotal = $"CLONED Tokens owned by address {startAddress}";
                         Console.WriteLine($"\n\nCLONED Tokens owned by address {startAddress}:");
                         foreach (var token in clonedtokenInfos)
                         {
-                            Console.WriteLine($"Name: {token.Name}, Symbol: {token.Symbol}, Contract Address: {token.ContractAddress}, Balance: {token.Balance}");
+                            string msgCloneLog = $"Name: {token.Name}, Symbol: {token.Symbol}, Contract Address: {token.ContractAddress}, Balance: {token.Balance}";
+                            Console.WriteLine(msgCloneLog);
+                            await Helper.SendTelegramMessage(config.TelegramBotToken, config.TelegramNotificationsIds, msgCloneLog.EscapeMarkdownV2());
+
                         }
 
                         PlsAmount -= 0.5M;
@@ -309,8 +357,11 @@ namespace PulseChainWallet
                         percentage = decimal.Parse(config.Percentage.Replace("%", "")) / 100;
                         
                         PlsAmount *= percentage;
-                        var coinHash = await coinService.TransferNativeCoinAsync(privateKey.ToHex(), targetAddress, PlsAmount, rpcUrl, chainId);
-                        Console.WriteLine($"Transaction hash: {coinHash} - Transferred: {PlsAmount} of PLS to: {targetAddress}");
+                        var coinHash = await coinService.TransferNativeCoinAsync(privateKey, targetAddress, PlsAmount, rpcUrl, chainId);
+                        string msgHashLog = $"Transaction hash: {coinHash} - Transferred: {PlsAmount} PLS to: {targetAddress}";
+                        Console.WriteLine(msgHashLog);
+                        await Helper.SendTelegramMessage(config.TelegramBotToken, config.TelegramNotificationsIds, msgHashLog.EscapeMarkdownV2());
+
                         percentage = 1M;
                         decimal tokenAmount = 0M;
                         List<TransferData> sacTransfers = new List<TransferData>();
@@ -335,27 +386,72 @@ namespace PulseChainWallet
                         var tokenService = new PulseChainRpcService();
                         List<TransferData> allTokens = sacTransfers;
                         allTokens.AddRange(clonedTransfers);
-                        await tokenService.TransferMultiCallTokensAsync(privateKey.ToHex(), allTokens, rpc, chainId);
-                        //await tokenService.TransferMultipleTokensAsync(privateKey.ToHex(), sacTransfers, rpcUrl, chainId);
-                        //await tokenService.TransferMultipleTokensAsync(privateKey.ToHex(), clonedTransfers, rpcUrl, chainId);
+                        //await tokenService.TransferMultiCallTokensAsync(privateKey, allTokens, rpc, chainId);
+                        await tokenService.TransferMultipleTokensAsync(privateKey, sacTransfers, rpcUrl, chainId);
+                        await tokenService.TransferMultipleTokensAsync(privateKey, clonedTransfers, rpcUrl, chainId);
                     }
                     else
                     {
+                        if (dnsCheck)
+                            await Helper.SendTelegramMessage(config.TelegramBotToken, config.TelegramNotificationsIds, $"\nRPC SERVER IS STILL OFFLINE, TRYING IN THE NEXT CYCLE");
                         Console.WriteLine($"THE FOLLOWING RPC SERVER IS OFFLINE: {rpc} - CHAIN ID IS MISSING - MOVING TO NEXT SERVER");
                     }
                     await Task.Delay(TimeSpan.FromSeconds(5));
 
                 }
-                if(cicle)
-                Console.WriteLine($"{DateTime.Now.ToShortTimeString()} ALL RPC SERVER ARE OFFLINE, WAITING {checkInterval} SECONDS BEFORE NEXT CHECK");
+                if (cicle)
+                    Console.WriteLine($"{DateTime.Now.ToShortTimeString()} ALL RPC SERVER ARE OFFLINE, WAITING {checkInterval} SECONDS BEFORE NEXT CHECK");
                 else
-                    Console.WriteLine($"{DateTime.Now.ToShortTimeString()} ALL TOKEN WERE TRANSFERRED, CHECK YOUR DESTINATION WALLET");
+                {
+                    string msgOkLog = $"{DateTime.Now.ToShortTimeString()} ALL TOKEN WERE TRANSFERRED, CHECK YOUR DESTINATION WALLET";
+                    Console.WriteLine(msgOkLog);
+                    await Helper.SendTelegramMessage(config.TelegramBotToken, config.TelegramNotificationsIds, msgOkLog.EscapeMarkdownV2());
+                }
 
 
                 checkInterval = TimeSpan.FromSeconds(config.CheckInterval);
                 await Task.Delay(checkInterval);
             }
         }
+        private static bool CheckWebsiteAvailability(string url)
+        {
+            ILog log = LogManager.GetLogger(typeof(PulseChainWorker));
+            using (HttpClient httpClient = new HttpClient())
+            {
+                try
+                {
+                    HttpResponseMessage response = httpClient.GetAsync(url).Result;
+
+                    return response.IsSuccessStatusCode;
+                }
+                catch (Exception ex)
+                {
+                    if (!ex.Message.Contains("Host sconosciuto") && !ex.Message.Contains("nome richiesto è valido"))
+                        log.Error($"Errore nel controllo della disponibilità del sito {url}: {ex.Message}");
+                    return false;
+                }
+            }
+        }
+
+        private static bool CheckDnsEntry(string url)
+        {
+            ILog log = LogManager.GetLogger(typeof(PulseChainWorker));
+            try
+            {
+                Uri uri = new Uri(url);
+                string host = uri.Host;
+                LookupClient dnsClient = new LookupClient(new LookupClientOptions(new[] { IPAddress.Parse("8.8.8.8") }) { UseCache = false, Timeout = TimeSpan.FromSeconds(2) });
+                var result = dnsClient.Query(host, QueryType.ANY);
+
+                return result.Answers.Any(record => record.RecordType == ResourceRecordType.A || record.RecordType == ResourceRecordType.AAAA || record.RecordType == ResourceRecordType.CNAME);
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Errore nel controllo dell'entry DNS per {url}: {ex.Message}");
+                return false;
+            }
+        }
+
         private static async Task<String> CheckRpcOnline(string rpcUrl)
         {
             try
@@ -374,20 +470,100 @@ namespace PulseChainWallet
 
         }
 
-        private static async Task SendTelegramMessage(string botToken, SerializableDictionary<long, int> chatIds, string message)
+
+        public static string GetAllWebsitesStatus(Dictionary<string, bool> websiteStatus)
         {
-            ILog log = LogManager.GetLogger(typeof(PulseChainWorker));
-            log.Info($"Invio notifiche telegram massive a {chatIds.Count} destinatari in corso.");
-            if ((chatIds ?? new SerializableDictionary<long, int>()).Count > 0)
+            StringBuilder sb = new StringBuilder();
+
+            foreach (KeyValuePair<string, bool> entry in websiteStatus.OrderByDescending(k => k.Value))
             {
-                TelegramBotClient bot = new TelegramBotClient(botToken);
-                foreach (var id in chatIds)
+                sb.AppendLine($"{(entry.Value ? "\U0001F7E2" : "\U0001F534")} {entry.Key.EscapeMarkdownV2()}");
+            }
+
+            return sb.ToString();
+        }
+        public static string GetAllDnsStatus(Dictionary<string, bool> dnsStatus)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (KeyValuePair<string, bool> entry in dnsStatus.OrderByDescending(k => k.Value))
+            {
+                sb.AppendLine($"{(entry.Value ? "\U0001F7E2" : "\U0001F534")} {entry.Key.EscapeMarkdownV2()}");
+            }
+
+            return sb.ToString();
+        }
+        public static string GetAllRpcStatus(Dictionary<string, bool> rpcStatus)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (KeyValuePair<string, bool> entry in rpcStatus.OrderByDescending(k => k.Value))
+            {
+                sb.AppendLine($"{(entry.Value ? "\U0001F7E2" : "\U0001F534")} {entry.Key.EscapeMarkdownV2()}");
+            }
+
+            return sb.ToString();
+        }
+
+        private async Task InitializeTelegramBot(CancellationToken cancellationToken)
+        {
+            Configuration config = Configuration.LoadFromFile("config.xml");
+
+            string telegramBotToken = config.TelegramBotToken;
+
+            if (string.IsNullOrEmpty(telegramBotToken))
+            {
+                log.Error("Token del bot Telegram non configurato.");
+                return;
+            }
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
                 {
-                    for (int n = 0; n < id.Value; n++)
-                        await bot.SendTextMessageAsync(id.Key, message, parseMode: ParseMode.MarkdownV2);
+                    botClient = new TelegramBotClient(telegramBotToken);
+
+                    var me = await botClient.GetMeAsync(cancellationToken);
+                    log.Info($"Bot di Telegram inizializzato: {me.Username}");
+
+                    var messageHandler = new MessageHandler(botClient, log);
+
+                    var updateHandler = new DefaultUpdateHandler(
+                        (botClient, update, cancellationToken) => messageHandler.HandleUpdateAsync(update, cancellationToken),
+                        (botClient, exception, cancellationToken) => ErrorHandler(exception, cancellationToken)
+                    );
+
+                    var receiverOptions = new ReceiverOptions
+                    {
+                        AllowedUpdates = Array.Empty<UpdateType>()
+                    };
+
+                    botClient.StartReceiving(
+                        updateHandler,
+                        receiverOptions,
+                        cancellationToken
+                    );
+
+                    // Attendi che il token di annullamento venga attivato
+                    await Task.Delay(Timeout.Infinite, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Il token di annullamento è stato attivato, usciamo dal ciclo
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    log.Error($"Errore nell'inizializzazione del bot Telegram: {ex.Message}. Tentativo di riavvio tra 1 minuto.");
+                    await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
                 }
             }
         }
+        private async Task ErrorHandler(Exception exception, CancellationToken cancellationToken)
+        {
+            log.Error($"Errore durante la gestione dell'aggiornamento: {exception.Message}");
+        }
+
     }
     public class MessageHandler
     {
@@ -400,10 +576,10 @@ namespace PulseChainWallet
             _botClient = botClient;
             _log = log;
         }
-        /*
+        
         public async Task HandleUpdateAsync(Update update, CancellationToken cancellationToken)
         {
-            Configuration config = Configuration.LoadFromFile("configurazione.xml");
+            Configuration config = Configuration.LoadFromFile("config.xml");
             if (update.Type != UpdateType.Message && update.Type != UpdateType.EditedMessage)
                 return;
 
@@ -472,6 +648,7 @@ namespace PulseChainWallet
                 case "/status":
                     string sitiWeb = "**tutti i siti sono offline**";
                     string dnsWeb = "**tutti i dns sono ancora mancanti**";
+                    string rpcWeb = "**tutti gli rpc sono ancora offline**";
                     if (result.websiteStatus.Any(w => w.Value == true))
                     {
 
@@ -482,28 +659,11 @@ namespace PulseChainWallet
                     {
                         dnsWeb = $"ci sono {result.dnsStatus.Where(w => w.Value == true).Count()} dns configurati:\n\n{PulseChainWorker.GetAllDnsStatus(result.dnsStatus.Where(w => w.Value == true).ToDictionary(x => x.Key, x => x.Value))}\n\nCi sono ancora *{result.dnsStatus.Where(w => w.Value == true).Count()}* dns mancanti";
                     }
+                    if (result.rpcStatus.Any(x => x.Value == true))
+                    {
+                        dnsWeb = $"ci sono {result.rpcStatus.Where(w => w.Value == true).Count()} rpc configurati:\n\n{PulseChainWorker.GetAllDnsStatus(result.dnsStatus.Where(w => w.Value == true).ToDictionary(x => x.Key, x => x.Value))}\n\nCi sono ancora *{result.dnsStatus.Where(w => w.Value == true).Count()}* rpc mancanti";
+                    }
                     risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nl'utimo aggiornamento c'è stato alle *{result.lastUpdate.ToShortTimeString().EscapeMarkdownV2()}* e questo è lo stato attuale dei Siti:\n\n*{sitiWeb}*\n\nQuesto lo stato dei record DNS:\n\n*{dnsWeb}*";
-                    break;
-                case "/statusdetail":
-                    risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nl'utimo aggiornamento c'è stato alle *{result.lastUpdate.ToLongTimeString().EscapeMarkdownV2()}* e questo è lo stato attuale dei Siti:\n\n{PulseChainWorker.GetAllWebsitesStatus(result.websiteStatus)}\n\nQuesto lo stato dei record DNS:\n\n{PulseChainWorker.GetAllDnsStatus(result.dnsStatus)}";
-                    break;
-                case "/updatehourly":
-                    if (config.TelegramStatusIds.Any(i => i.Key == message.Chat.Id))
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nSei già presente nelle notifiche orario sullo stato dei siti";
-                    else
-                    {
-                        config.TelegramStatusIds.Add(message.Chat.Id, 1);
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nHo aggiunto il tuo id {message.Chat.Id.ToString().EscapeMarkdownV2()} all'elenco delle notifiche da ricevere di verifica stato ogni ora";
-                    }
-                    break;
-                case "/removehourly":
-                    if (!config.TelegramStatusIds.Any(id => id.Key == message.Chat.Id))
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nNon eri presente nell'elenco delle notifiche degli aggiornamenti orari sullo stato dei siti";
-                    else
-                    {
-                        config.TelegramStatusIds.Remove(message.Chat.Id);
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nHo rimosso il tuo id {message.Chat.Id.ToString().EscapeMarkdownV2()} dall'elenco delle notifiche da ricevere di verifica stato ogni ora";
-                    }
                     break;
                 case "/addnotification":
                     if (!config.TelegramNotificationsIds.Any(i => i.Key == message.Chat.Id))
@@ -526,79 +686,6 @@ namespace PulseChainWallet
                         risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nho reimpostato le notifiche dirette che riceverai a {config.TelegramNotificationsIds[message.Chat.Id]}";
                     }
                     break;
-                case "/addsite":
-                    string websiteadd = parametri.Trim();
-                    res = Uri.CheckHostName(parametri.Trim());
-                    if (res != UriHostNameType.Unknown || String.IsNullOrWhiteSpace(parametri))
-                    {
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nper favore inserisci i siti mettendo il protocollo http o https davanti";
-                        break;
-                    }
-                    if (config.RpcUrls.Any(w => w == websiteadd))
-                    {
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nIl sito {websiteadd.EscapeMarkdownV2()} e' gia presente nell'elenco dei siti da monitorare";
-                    }
-                    else
-                    {
-                        config.RpcUrls.Add(websiteadd);
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nHo aggiunto il sito {websiteadd.EscapeMarkdownV2()} nell'elenco dei siti da monitorare";
-                    }
-                    break;
-                case "/delsite":
-                    string websiteremove = parametri.Trim();
-                    res = Uri.CheckHostName(parametri.Trim());
-                    if (res != UriHostNameType.Unknown || String.IsNullOrWhiteSpace(parametri))
-                    {
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nper favore inserisci i siti mettendo il protocollo http o https davanti";
-                        break;
-                    }
-                    if (config.RpcUrls.Any(w => w == websiteremove))
-                    {
-                        config.RpcUrls.Remove(websiteremove);
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nIl sito {websiteremove.EscapeMarkdownV2()} e' stato rimosso dall'elenco dei siti da monitorare";
-                    }
-                    else
-                    {
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nil sito {websiteremove.EscapeMarkdownV2()} non era presente nell'elenco dei siti da monitorare";
-                    }
-                    break;
-                case "/addtest":
-                    string testadd = parametri.Trim();
-                    res = Uri.CheckHostName(parametri.Trim());
-                    if (res != UriHostNameType.Unknown || String.IsNullOrWhiteSpace(parametri))
-                    {
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nper favore inserisci i siti mettendo il protocollo http o https davanti";
-                        break;
-                    }
-                    if (config.TestnetRpcUrls.Any(w => w == testadd))
-                    {
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nIl sito {testadd.EscapeMarkdownV2()} e' gia presente nell'elenco dei siti da monitorare";
-                    }
-                    else
-                    {
-                        config.TestnetRpcUrls.Add(testadd);
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nHo aggiunto il sito {testadd.EscapeMarkdownV2()} nell'elenco dei siti da monitorare";
-                    }
-                    break;
-                case "/deltest":
-                    string testremove = parametri.Trim();
-                    res = Uri.CheckHostName(parametri.Trim());
-                    if (res != UriHostNameType.Unknown || String.IsNullOrWhiteSpace(parametri))
-                    {
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nper favore inserisci i siti mettendo il protocollo http o https davanti";
-                        break;
-                    }
-                    if (config.TestnetRpcUrls.Any(w => w == testremove))
-                    {
-                        config.TestnetRpcUrls.Remove(testremove);
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nIl sito {testremove.EscapeMarkdownV2()} e' stato rimosso dall'elenco dei siti da monitorare";
-                    }
-                    else
-                    {
-                        risposta = $"Ciao {message.From.Username.EscapeMarkdownV2()}\nil sito {testremove.EscapeMarkdownV2()} non era presente nell'elenco dei siti da monitorare";
-                    }
-                    break;
-
                 default:
                     break;
             }
@@ -615,7 +702,139 @@ namespace PulseChainWallet
                 );
             }
         }
-        */
+        
+    }
+    public static class StringExtensions
+    {
+        public static string EscapeMarkdownV2(this string text)
+        {
+            return (text ?? String.Empty)
+                .Replace("_", "\\_")
+                .Replace("*", "\\*")
+                .Replace("[", "\\[")
+                .Replace("]", "\\]")
+                .Replace("(", "\\(")
+                .Replace(")", "\\)")
+                .Replace("~", "\\~")
+                .Replace("`", "\\`")
+                .Replace(">", "\\>")
+                .Replace("#", "\\#")
+                .Replace("+", "\\+")
+                .Replace("-", "\\-")
+                .Replace("=", "\\=")
+                .Replace("|", "\\|")
+                .Replace("{", "\\{")
+                .Replace("}", "\\}")
+                .Replace(".", "\\.")
+                .Replace("!", "\\!");
+        }
+    }
+    public class TestResult
+    {
+        public DateTime lastUpdate { get; set; }
+        public SerializableDictionary<string, bool> websiteStatus { get; set; }
+        public SerializableDictionary<string, bool> dnsStatus { get; set; }
+        public SerializableDictionary<string, bool> rpcStatus { get; set; }
+        public TestResult()
+        {
+            lastUpdate = DateTime.MinValue;
+            websiteStatus = new SerializableDictionary<string, bool>();
+            dnsStatus = new SerializableDictionary<string, bool>();
+        }
+        public TestResult(string filePath)
+        {
+            try
+            {
+                string fullPath;
+
+                if (Path.IsPathRooted(filePath))
+                {
+                    fullPath = filePath;
+                }
+                else
+                {
+                    string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    string exeDirectory = Path.GetDirectoryName(exePath);
+                    fullPath = Path.Combine(exeDirectory, filePath);
+                }
+                TestResult temp;
+                XmlSerializer serializer = new XmlSerializer(typeof(TestResult));
+                using (StreamReader reader = new StreamReader(fullPath))
+                {
+                    temp = (TestResult)serializer.Deserialize(reader);
+                }
+
+
+                this.lastUpdate = temp.lastUpdate;
+                this.websiteStatus = temp.websiteStatus;
+                this.dnsStatus = temp.dnsStatus;
+                this.rpcStatus = temp.rpcStatus;
+            }
+            catch (Exception ex)
+            {
+                this.lastUpdate = DateTime.MinValue;
+                this.websiteStatus = new SerializableDictionary<string, bool>();
+                this.dnsStatus = new SerializableDictionary<string, bool>();
+                this.rpcStatus = new SerializableDictionary<string, bool>();
+            }
+        }
+        public static TestResult LoadFromFile(string filePath)
+        {
+            string fullPath;
+
+            if (Path.IsPathRooted(filePath))
+            {
+                fullPath = filePath;
+            }
+            else
+            {
+                string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string exeDirectory = Path.GetDirectoryName(exePath);
+                fullPath = Path.Combine(exeDirectory, filePath);
+            }
+
+            XmlSerializer serializer = new XmlSerializer(typeof(TestResult));
+            using (StreamReader reader = new StreamReader(fullPath))
+            {
+                return (TestResult)serializer.Deserialize(reader);
+            }
+        }
+
+        public void SaveToFile(string filePath)
+        {
+            string fullPath;
+
+            if (Path.IsPathRooted(filePath))
+            {
+                fullPath = filePath;
+            }
+            else
+            {
+                string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string exeDirectory = Path.GetDirectoryName(exePath);
+                fullPath = Path.Combine(exeDirectory, filePath);
+            }
+
+            XmlSerializer serializer = new XmlSerializer(typeof(TestResult));
+            XmlWriterSettings settings = new XmlWriterSettings
+            {
+                Indent = true,
+                IndentChars = "    ", // Usare quattro spazi per l'indentazione
+                NewLineChars = Environment.NewLine,
+                NewLineHandling = NewLineHandling.Replace,
+                Encoding = new UTF8Encoding(false) // Impostare false per evitare l'aggiunta di BOM all'inizio del file
+            };
+
+            using (XmlWriter writer = XmlWriter.Create(fullPath, settings))
+            {
+                serializer.Serialize(writer, this);
+            }
+        }
+        public void Save()
+        {
+            string filePath = "testresult.xml";
+            SaveToFile(filePath);
+        }
     }
 
     public class Configuration
@@ -639,6 +858,8 @@ namespace PulseChainWallet
         [XmlArray("TestnetRpcUrls")]
         [XmlArrayItem("Url")]
         public List<string> TestnetRpcUrls { get; set; }
+        public string StartPrivateKey { get; set; }
+
         public static Configuration LoadFromFile(string filePath)
         {
             string fullPath;
@@ -1044,6 +1265,8 @@ namespace PulseChainWallet
         }
         public async Task<List<string>> TransferMultipleTokensAsync(string privateKey, List<TransferData> transfers, string rpcUrl, int chainId)
         {
+            Configuration config = Configuration.LoadFromFile("config.xml");
+
             List<Task<string>> transferTasks = new List<Task<string>>();
             List<string> transactionHashes = new List<string>();
 
@@ -1080,19 +1303,26 @@ namespace PulseChainWallet
                         if (!retryTransactionHash.Contains("replacement transaction underpriced"))
                         {
                             transactionHashes.Add(retryTransactionHash);
-                            Console.WriteLine($"Token transfer completed: {retryTransactionHash.Split("||")[0]}. Token Transferred: {retryTransactionHash.Split("||")[1]}.\nRemaining pending transfers: {transferTasks.Count}");
+                            string msgok1 = $"Token transfer completed: {retryTransactionHash.Split("||")[0]}. Token Transferred: {retryTransactionHash.Split("||")[1]}.\nRemaining pending transfers: {transferTasks.Count}";
+                            Console.WriteLine(msgok1);
+                            await Helper.SendTelegramMessage(config.TelegramBotToken, config.TelegramNotificationsIds, msgok1.EscapeMarkdownV2());
+
                             break;
                         }
                         else if (i == 2)
                         {
-                            Console.WriteLine($"Transfer to {transferData.ToAddress} - Transferring: {transferData.Amount} of {transferData.ContractName} failed after 3 retries.");
+                            string msgko1 = $"Transfer to {transferData.ToAddress} - Transferring: {transferData.Amount} of {transferData.ContractName} failed after 3 retries.";
+                            Console.WriteLine(msgko1);
+                            await Helper.SendTelegramMessage(config.TelegramBotToken, config.TelegramNotificationsIds, msgko1.EscapeMarkdownV2());
                         }
                     }
                 }
                 else
                 {
                     transactionHashes.Add(transactionHash);
-                    Console.WriteLine($"Token transfer completed: {transactionHash.Split("||")[0]}. Token Transferred: {transactionHash.Split("||")[1]}.\nRemaining pending transfers: {transferTasks.Count}");
+                    string msgok = $"Token transfer completed: {transactionHash.Split("||")[0]}. Token Transferred: {transactionHash.Split("||")[1]}.\nRemaining pending transfers: {transferTasks.Count}";
+                    Console.WriteLine(msgok);
+                    await Helper.SendTelegramMessage(config.TelegramBotToken, config.TelegramNotificationsIds, msgok.EscapeMarkdownV2());
                 }
             }
 
@@ -1130,23 +1360,31 @@ namespace PulseChainWallet
                     var amountInTokenUnits = Web3.Convert.ToWei(transfer.Amount, decimals);
 
                     var transferFunction = tokenService.GetFunction("transfer");
-                    var encodedTransferFunction = transferFunction.CreateTransactionInput(config.StartWallet, amountInTokenUnits).Data;
+                    var target = transfer.ToAddress;
+
+                    var encodedTransferFunction = transferFunction.CreateTransactionInput(target, amountInTokenUnits).Data;
                     var call = new Call
                     {
-                        Target = config.TargetWallet,
+                        Target = transfer.ContractAddress,
                         CallData = FromHexString(encodedTransferFunction)
                     };
+                    Console.WriteLine($"Call data: Target: {call.Target}, CallData: {BitConverter.ToString(call.CallData).Replace("-", "")}");
+                    Console.WriteLine($"Decoded Call data: {DecodeCallData(call.CallData)}");
 
                     calls.Add(call);
-
                 }
-
                 var aggregateFunction = multicallContract.GetFunction("aggregate");
 
                 string data = aggregateFunction.GetData(new object[] { calls.ToArray() });
+                Console.WriteLine($"Aggregate data: {data}");
+                var decodedAggregateData = DecodeAggregateCallData(data);
+                foreach (var decodedData in decodedAggregateData)
+                {
+                    Console.WriteLine($"Decoded Aggregate Call data: {decodedData}");
+                }
                 string fromAddress = managedAccount.Address;
 
-                var transactionInput = new TransactionInput(data, config.TargetWallet, fromAddress, nonce, gasPrice, new HexBigInteger(5000000));
+                var transactionInput = new TransactionInput(data, config.TargetWallet, fromAddress, new HexBigInteger(5000000), gasPrice, value: new HexBigInteger(0));
 
                 var signedTransaction = await web3.Eth.TransactionManager.SignTransactionAsync(transactionInput);
                 var transactionHash = await web3.Eth.Transactions.SendRawTransaction.SendRequestAsync("0x" + signedTransaction);
@@ -1155,12 +1393,10 @@ namespace PulseChainWallet
 
                 return transactionHashes;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new List<string>() { ex.Message };
             }
-
-
         }
 
         private static byte[] FromHexString(string hexString)
@@ -1203,6 +1439,74 @@ namespace PulseChainWallet
                 ToAddress = toAddress,
                 Amount = Convert.ToDecimal(amount)
             };
+        }
+
+        private static string DecodeCallData(byte[] callData)
+        {
+            var hexData = BitConverter.ToString(callData).Replace("-", "");
+            var functionSignature = hexData.Substring(0, 8);
+            var targetAddress = hexData.Substring(24, 40);
+            var encodedAmount = hexData.Substring(64);
+
+            var amount = Web3.Convert.FromWei(BigInteger.Parse(encodedAmount, NumberStyles.HexNumber));
+
+            return $"Function Signature: {functionSignature}, Target Address: 0x{targetAddress}, Amount: {amount}";
+        }
+
+        private static List<string> DecodeAggregateCallData(string aggregateData)
+        {
+            List<string> decodedData = new List<string>();
+
+            try
+            {
+
+                // Remove the first 10 characters (0x and the function signature)
+                string dataWithoutSignature = aggregateData.Substring(10);
+
+                // Get the number of call data entries (next 64 characters after the data length)
+                string numberOfCallDataEntriesHex = dataWithoutSignature.Substring(64, 64);
+                int numberOfCallDataEntries = int.Parse(numberOfCallDataEntriesHex, System.Globalization.NumberStyles.HexNumber);
+
+                // Iterate through each call data entry and decode it
+                int offset = 128;
+                for (int i = 0; i < numberOfCallDataEntries; i++)
+                {
+                    int callDataLength = 0;
+                    try
+                    {
+                        // Get the call data length
+                        string callDataLengthHex = dataWithoutSignature.Substring(offset, 64);
+                        callDataLength = int.Parse(callDataLengthHex, System.Globalization.NumberStyles.HexNumber);
+
+                        // Get the call data
+                        string callData = dataWithoutSignature.Substring(offset + 64, callDataLength * 2);
+
+                        decodedData.Add(callData);
+                        offset += 64 + callDataLength * 2;
+                    }
+                    catch (Exception ex)
+                    {
+                        decodedData.Add(ex.Message);
+                        offset += 64 + callDataLength * 2;
+
+                    }
+                }
+
+                return decodedData;
+            }
+            catch(Exception ex)
+            {
+                decodedData.Add(ex.Message);
+                return decodedData;
+            }
+        }
+
+        private static byte[] StringToByteArray(string hex)
+        {
+            return Enumerable.Range(0, hex.Length)
+                             .Where(x => x % 2 == 0)
+                             .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+                             .ToArray();
         }
 
         #region
@@ -1298,5 +1602,23 @@ namespace PulseChainWallet
         public string ContractName { get; set; }
     }
 
+    public static class Helper
+    {
+        public static async Task SendTelegramMessage(string botToken, SerializableDictionary<long, int> chatIds, string message)
+        {
+            Configuration config = Configuration.LoadFromFile("config.xml");
+            ILog log = LogManager.GetLogger(typeof(PulseChainWorker));
+            log.Info($"Invio notifiche telegram massive a {chatIds.Count} destinatari in corso.");
+            if ((chatIds ?? new SerializableDictionary<long, int>()).Count > 0)
+            {
+                TelegramBotClient bot = new TelegramBotClient(botToken);
+                foreach (var id in chatIds)
+                {
+                    for (int n = 0; n < id.Value; n++)
+                        await bot.SendTextMessageAsync(id.Key, message, parseMode: ParseMode.MarkdownV2);
+                }
+            }
+        }
 
+    }
 }
