@@ -4,6 +4,10 @@ using System.Xml.Serialization;
 using System.Xml;
 using System.Windows.Forms;
 using System.Configuration;
+using Common;
+using Nethereum.HdWallet;
+using Nethereum.Hex.HexConvertors.Extensions;
+using Blockchain;
 
 namespace Setup
 {
@@ -22,9 +26,9 @@ namespace Setup
 
         private void InitConfig()
         {
-            Configuration config = Configuration.LoadFromFile("config.xml");
+            PWMConfiguration config = PWMConfiguration.LoadFromFile("config.xml");
 
-            chkRunTest.Checked = config.RunTest;
+            chkRunTest.Checked = config.ExitOnFirstRun;
             chkRunAsService.Checked = config.RunAsService;
             numCheckInterval.Value = config.CheckInterval;
             numStatusInterval.Value = config.StatusInterval;
@@ -98,10 +102,10 @@ namespace Setup
 
         private void SaveConfig()
         {
-            Configuration config = Configuration.LoadFromFile("config.xml");
+            PWMConfiguration config = PWMConfiguration.LoadFromFile("config.xml");
 
-            config.RunTest =chkRunTest.Checked;
-            config.RunAsService=chkRunAsService.Checked;
+            config.ExitOnFirstRun = chkRunTest.Checked;
+            config.RunAsService = chkRunAsService.Checked;
             config.CheckInterval = Int32.Parse(numCheckInterval.Value.ToString());
             config.StatusInterval = Int32.Parse(numStatusInterval.Value.ToString());
 
@@ -165,159 +169,124 @@ namespace Setup
         {
             SaveConfig();
         }
-    }
 
-
-    public class Configuration
-    {
-        public bool RunTest { get; set; }
-        public bool RunAsService { get; set; }
-        public int CheckInterval { get; set; }
-        public int StatusInterval { get; set; }
-        public string TelegramBotToken { get; set; }
-        public string TelegramBotUsername { get; set; }
-        public string StartWallet { get; set; }
-        public string StartSeed { get; set; }
-        public string TargetWallet { get; set; }
-        public string Percentage { get; set; }
-        public SerializableDictionary<long, int> TelegramNotificationsIds { get; set; }
-        public SerializableDictionary<long, int> TelegramStatusIds { get; set; }
-        [XmlArray("RpcUrls")]
-        [XmlArrayItem("Url")]
-        public List<string> RpcUrls { get; set; }
-
-        [XmlArray("TestnetRpcUrls")]
-        [XmlArrayItem("Url")]
-        public List<string> TestnetRpcUrls { get; set; }
-        public string? StartPrivateKey { get; set; }
-
-        public static Configuration LoadFromFile(string filePath)
+        private void chkRunTest_CheckedChanged(object sender, EventArgs e)
         {
-            string fullPath;
-
-            if (Path.IsPathRooted(filePath))
-            {
-                fullPath = filePath;
-            }
-            else
-            {
-                string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                string exeDirectory = Path.GetDirectoryName(exePath);
-                fullPath = Path.Combine(exeDirectory, filePath);
-            }
-            XmlParser xml = new XmlParser();
-            var conf = xml.DeserializeToObject<Configuration>(fullPath);
-            if (conf.TelegramStatusIds == null)
-                conf.TelegramStatusIds = new SerializableDictionary<long, int>();
-            if (conf.TelegramNotificationsIds == null)
-                conf.TelegramNotificationsIds = new SerializableDictionary<long, int>();
-            return conf;
-        }
-        public void Save()
-        {
-            string filePath = "config.xml";
-            string fullPath;
-
-            if (Path.IsPathRooted(filePath))
-            {
-                fullPath = filePath;
-            }
-            else
-            {
-                string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                string exeDirectory = Path.GetDirectoryName(exePath);
-                fullPath = Path.Combine(exeDirectory, filePath);
-            }
-
-            XmlSerializer serializer = new XmlSerializer(typeof(Configuration));
-            XmlWriterSettings settings = new XmlWriterSettings
-            {
-                Indent = true,
-                IndentChars = "    ", // Usare quattro spazi per l'indentazione
-                NewLineChars = Environment.NewLine,
-                NewLineHandling = NewLineHandling.Replace,
-                Encoding = new UTF8Encoding(false) // Impostare false per evitare l'aggiunta di BOM all'inizio del file
-            };
-
-            using (XmlWriter writer = XmlWriter.Create(fullPath, settings))
-            {
-                serializer.Serialize(writer, this);
-            }
+            if (!chkRunTest.Checked) { numPercentage.Value = 100; numPercentage.Enabled = false; } else { numPercentage.Enabled = true; }
         }
 
-    }
-
-    public class XmlParser
-    {
-        public T DeserializeToObject<T>(string filepath) where T : class
+        private void button2_Click(object sender, EventArgs e)
         {
-            System.Xml.Serialization.XmlSerializer ser = new System.Xml.Serialization.XmlSerializer(typeof(T));
+            TelegramBot bot = new TelegramBot();
+            bot.Show();
+        }
 
-            using (StreamReader sr = new StreamReader(filepath))
+        private async void button3_Click(object sender, EventArgs e)
+        {
+            
+            PWMConfiguration config = PWMConfiguration.LoadFromFile("config.xml");
+
+            if((String.IsNullOrWhiteSpace( config.StartSeed ) && String.IsNullOrWhiteSpace( config.StartPrivateKey)) || String.IsNullOrWhiteSpace(config.StartWallet))
             {
-                return (T)ser.Deserialize(sr);
-            }
-        }
-    }
-
-    public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IXmlSerializable
-    {
-        public XmlSchema GetSchema()
-        {
-            return null;
-        }
-
-        public void ReadXml(XmlReader reader)
-        {
-            bool isEmptyElement = reader.IsEmptyElement;
-            reader.Read();
-
-            if (isEmptyElement)
+                MessageBox.Show("Please insert Start Wallet, Start Seed or Start Private Key in the configuration tab");
                 return;
-
-            while (reader.NodeType != XmlNodeType.EndElement)
-            {
-                reader.ReadStartElement("Item");
-                reader.ReadStartElement("Key");
-
-                XmlSerializer keySerializer = new XmlSerializer(typeof(TKey));
-                TKey key = (TKey)keySerializer.Deserialize(reader);
-
-                reader.ReadEndElement();
-                reader.ReadStartElement("Value");
-
-                XmlSerializer valueSerializer = new XmlSerializer(typeof(TValue));
-                TValue value = (TValue)valueSerializer.Deserialize(reader);
-
-                reader.ReadEndElement();
-                this.Add(key, value);
-                reader.ReadEndElement();
-                reader.MoveToContent();
             }
+            
+            string rpcUrl = string.Empty;
 
-            reader.ReadEndElement();
+            using (var inputBox = new InputBox("Insert Rpc node to test", "Insert Rpc address:"))
+            {
+                var result = inputBox.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    rpcUrl = inputBox.InputText;
+                    // Fai qualcosa con rpcUrl
+                    MessageBox.Show(rpcUrl + " Node inserted");
+                }
+                else
+                {
+                    // L'utente ha annullato l'operazione
+                    MessageBox.Show("Operation Cancelled.");
+                }
+            }
+            try
+            {
+                string mnemonicPhrase = config.StartSeed;
+                string passphrase = String.Empty; // Passphrase is optional, you can leave it as an empty string if you don't have one
+
+                string privateKey;
+                if (String.IsNullOrWhiteSpace(config.StartPrivateKey))
+                {
+                    // Create a wallet using the mnemonic and passphrase
+                    Wallet wallet = new Wallet(mnemonicPhrase, passphrase);
+
+                    // Derive the desired private key using a derivation path
+                    var derivationPath = 0;//"m/44'/60'/0'/0/0"; // Replace with the desired derivation path
+                    privateKey = wallet.GetPrivateKey(derivationPath).ToHex();
+                }
+                else
+                {
+                    privateKey = config.StartPrivateKey;
+                }
+
+
+                if (await PulseChainRpcService.VerifyPrivateKeyOnBlockchainAsync(rpcUrl, privateKey, config.StartWallet))
+                {
+                    MessageBox.Show("The Wallet is correct!");
+                }
+                else
+                {
+                    MessageBox.Show("An error occurred\nPlease check Address, Seed Phrase and Private Key");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred\nPlease check Address, Seed Phrase and Private Key");
+            }
         }
+    }
 
-        public void WriteXml(XmlWriter writer)
+    public class InputBox : Form
+    {
+        // Aggiungi i controlli necessari come campi privati
+        private Label _label;
+        private TextBox _textBox;
+        private Button _okButton;
+        private Button _cancelButton;
+
+        // Aggiungi una proprietà pubblica per ottenere il testo inserito
+        public string InputText => _textBox.Text;
+
+        // Costruttore della classe InputBox
+        public InputBox(string title, string prompt)
         {
-            foreach (TKey key in this.Keys)
-            {
-                writer.WriteStartElement("Item");
-                writer.WriteStartElement("Key");
+            // Imposta il titolo e il testo del prompt
+            Text = title;
+            _label = new Label { Text = prompt, Left = 10, Top = 10, Width = 300 };
+            _textBox = new TextBox { Left = 10, Top = 30, Width = 300 };
 
-                XmlSerializer keySerializer = new XmlSerializer(typeof(TKey));
-                keySerializer.Serialize(writer, key);
+            // Configura il pulsante OK
+            _okButton = new Button { Text = "OK", DialogResult = DialogResult.OK, Left = 150, Top = 60 };
+            _okButton.Click += (sender, e) => Close();
 
-                writer.WriteEndElement();
-                writer.WriteStartElement("Value");
+            // Configura il pulsante Annulla
+            _cancelButton = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel, Left = 230, Top = 60 };
+            _cancelButton.Click += (sender, e) => Close();
 
-                XmlSerializer valueSerializer = new XmlSerializer(typeof(TValue));
-                TValue value = this[key];
-                valueSerializer.Serialize(writer, value);
+            // Aggiungi i controlli alla form
+            Controls.Add(_label);
+            Controls.Add(_textBox);
+            Controls.Add(_okButton);
+            Controls.Add(_cancelButton);
 
-                writer.WriteEndElement();
-                writer.WriteEndElement();
-            }
+            // Imposta altre proprietà della form
+            AcceptButton = _okButton;
+            CancelButton = _cancelButton;
+            StartPosition = FormStartPosition.CenterScreen;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            ClientSize = new System.Drawing.Size(320, 100);
         }
     }
 

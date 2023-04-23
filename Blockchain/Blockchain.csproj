@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DnsClient" Version="1.7.0" />
+    <PackageReference Include="Nethereum.ABI" Version="4.14.0" />
+    <PackageReference Include="Nethereum.Accounts" Version="4.14.0" />
+    <PackageReference Include="Nethereum.Contracts" Version="4.14.0" />
+    <PackageReference Include="Nethereum.HdWallet" Version="4.14.0" />
+    <PackageReference Include="Nethereum.Hex" Version="4.14.0" />
+    <PackageReference Include="Nethereum.JsonRpc.RpcClient" Version="4.14.0" />
+    <PackageReference Include="Nethereum.RPC" Version="4.14.0" />
+    <PackageReference Include="Nethereum.StandardTokenEIP20" Version="4.14.0" />
+    <PackageReference Include="Nethereum.Util" Version="4.14.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\TelegramBot\TelegramBot.csproj" />
+  </ItemGroup>
+
+</Project>

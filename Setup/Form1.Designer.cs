@@ -28,399 +28,415 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.gridRpcTest = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.label8 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.numPercentage = new System.Windows.Forms.NumericUpDown();
-            this.txtTargetWallet = new System.Windows.Forms.TextBox();
-            this.txtStartSeed = new System.Windows.Forms.TextBox();
-            this.txtStartWallet = new System.Windows.Forms.TextBox();
-            this.txtTelegramBotUsername = new System.Windows.Forms.TextBox();
-            this.txtTelegramBotToken = new System.Windows.Forms.TextBox();
-            this.numStatusInterval = new System.Windows.Forms.NumericUpDown();
-            this.numCheckInterval = new System.Windows.Forms.NumericUpDown();
-            this.chkRunTest = new System.Windows.Forms.CheckBox();
-            this.chkRunAsService = new System.Windows.Forms.CheckBox();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.grdRpcMain = new System.Windows.Forms.DataGridView();
-            this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.grdRpcTestnet = new System.Windows.Forms.DataGridView();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.grdSacTokens = new System.Windows.Forms.DataGridView();
-            this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.grdClonedTokens = new System.Windows.Forms.DataGridView();
-            this.btnSave = new System.Windows.Forms.Button();
-            this.label9 = new System.Windows.Forms.Label();
-            this.txtStartPrivateKey = new System.Windows.Forms.TextBox();
-            this.gridRpcTest.SuspendLayout();
-            this.tabPage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numPercentage)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numStatusInterval)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numCheckInterval)).BeginInit();
-            this.tabPage2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.grdRpcMain)).BeginInit();
-            this.tabPage3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.grdRpcTestnet)).BeginInit();
-            this.tabPage4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.grdSacTokens)).BeginInit();
-            this.tabPage5.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.grdClonedTokens)).BeginInit();
-            this.SuspendLayout();
+            gridRpcTest = new TabControl();
+            tabPage1 = new TabPage();
+            button3 = new Button();
+            button2 = new Button();
+            txtStartPrivateKey = new TextBox();
+            label9 = new Label();
+            label8 = new Label();
+            button1 = new Button();
+            label7 = new Label();
+            label6 = new Label();
+            label5 = new Label();
+            label4 = new Label();
+            label3 = new Label();
+            label2 = new Label();
+            label1 = new Label();
+            numPercentage = new NumericUpDown();
+            txtTargetWallet = new TextBox();
+            txtStartSeed = new TextBox();
+            txtStartWallet = new TextBox();
+            txtTelegramBotUsername = new TextBox();
+            txtTelegramBotToken = new TextBox();
+            numStatusInterval = new NumericUpDown();
+            numCheckInterval = new NumericUpDown();
+            chkRunTest = new CheckBox();
+            chkRunAsService = new CheckBox();
+            tabPage2 = new TabPage();
+            grdRpcMain = new DataGridView();
+            tabPage3 = new TabPage();
+            grdRpcTestnet = new DataGridView();
+            tabPage4 = new TabPage();
+            grdSacTokens = new DataGridView();
+            tabPage5 = new TabPage();
+            grdClonedTokens = new DataGridView();
+            btnSave = new Button();
+            gridRpcTest.SuspendLayout();
+            tabPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numPercentage).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numStatusInterval).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numCheckInterval).BeginInit();
+            tabPage2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)grdRpcMain).BeginInit();
+            tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)grdRpcTestnet).BeginInit();
+            tabPage4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)grdSacTokens).BeginInit();
+            tabPage5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)grdClonedTokens).BeginInit();
+            SuspendLayout();
             // 
             // gridRpcTest
             // 
-            this.gridRpcTest.Controls.Add(this.tabPage1);
-            this.gridRpcTest.Controls.Add(this.tabPage2);
-            this.gridRpcTest.Controls.Add(this.tabPage3);
-            this.gridRpcTest.Controls.Add(this.tabPage4);
-            this.gridRpcTest.Controls.Add(this.tabPage5);
-            this.gridRpcTest.Location = new System.Drawing.Point(12, 12);
-            this.gridRpcTest.Name = "gridRpcTest";
-            this.gridRpcTest.SelectedIndex = 0;
-            this.gridRpcTest.Size = new System.Drawing.Size(776, 378);
-            this.gridRpcTest.TabIndex = 0;
+            gridRpcTest.Controls.Add(tabPage1);
+            gridRpcTest.Controls.Add(tabPage2);
+            gridRpcTest.Controls.Add(tabPage3);
+            gridRpcTest.Controls.Add(tabPage4);
+            gridRpcTest.Controls.Add(tabPage5);
+            gridRpcTest.Location = new Point(12, 12);
+            gridRpcTest.Name = "gridRpcTest";
+            gridRpcTest.SelectedIndex = 0;
+            gridRpcTest.Size = new Size(776, 378);
+            gridRpcTest.TabIndex = 0;
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.txtStartPrivateKey);
-            this.tabPage1.Controls.Add(this.label9);
-            this.tabPage1.Controls.Add(this.label8);
-            this.tabPage1.Controls.Add(this.button1);
-            this.tabPage1.Controls.Add(this.label7);
-            this.tabPage1.Controls.Add(this.label6);
-            this.tabPage1.Controls.Add(this.label5);
-            this.tabPage1.Controls.Add(this.label4);
-            this.tabPage1.Controls.Add(this.label3);
-            this.tabPage1.Controls.Add(this.label2);
-            this.tabPage1.Controls.Add(this.label1);
-            this.tabPage1.Controls.Add(this.numPercentage);
-            this.tabPage1.Controls.Add(this.txtTargetWallet);
-            this.tabPage1.Controls.Add(this.txtStartSeed);
-            this.tabPage1.Controls.Add(this.txtStartWallet);
-            this.tabPage1.Controls.Add(this.txtTelegramBotUsername);
-            this.tabPage1.Controls.Add(this.txtTelegramBotToken);
-            this.tabPage1.Controls.Add(this.numStatusInterval);
-            this.tabPage1.Controls.Add(this.numCheckInterval);
-            this.tabPage1.Controls.Add(this.chkRunTest);
-            this.tabPage1.Controls.Add(this.chkRunAsService);
-            this.tabPage1.Location = new System.Drawing.Point(4, 24);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(768, 350);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "General Options";
-            this.tabPage1.UseVisualStyleBackColor = true;
+            tabPage1.Controls.Add(button3);
+            tabPage1.Controls.Add(button2);
+            tabPage1.Controls.Add(txtStartPrivateKey);
+            tabPage1.Controls.Add(label9);
+            tabPage1.Controls.Add(label8);
+            tabPage1.Controls.Add(button1);
+            tabPage1.Controls.Add(label7);
+            tabPage1.Controls.Add(label6);
+            tabPage1.Controls.Add(label5);
+            tabPage1.Controls.Add(label4);
+            tabPage1.Controls.Add(label3);
+            tabPage1.Controls.Add(label2);
+            tabPage1.Controls.Add(label1);
+            tabPage1.Controls.Add(numPercentage);
+            tabPage1.Controls.Add(txtTargetWallet);
+            tabPage1.Controls.Add(txtStartSeed);
+            tabPage1.Controls.Add(txtStartWallet);
+            tabPage1.Controls.Add(txtTelegramBotUsername);
+            tabPage1.Controls.Add(txtTelegramBotToken);
+            tabPage1.Controls.Add(numStatusInterval);
+            tabPage1.Controls.Add(numCheckInterval);
+            tabPage1.Controls.Add(chkRunTest);
+            tabPage1.Controls.Add(chkRunAsService);
+            tabPage1.Location = new Point(4, 24);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new Padding(3);
+            tabPage1.Size = new Size(768, 350);
+            tabPage1.TabIndex = 0;
+            tabPage1.Text = "General Options";
+            tabPage1.UseVisualStyleBackColor = true;
             // 
-            // label8
+            // button3
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(333, 231);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(151, 15);
-            this.label8.TabIndex = 18;
-            this.label8.Text = "Original Wallet Seed Phrase";
+            button3.Location = new Point(650, 227);
+            button3.Name = "button3";
+            button3.Size = new Size(110, 23);
+            button3.TabIndex = 22;
+            button3.Text = "Check Wallet";
+            button3.UseVisualStyleBackColor = true;
+            button3.Click += button3_Click;
             // 
-            // button1
+            // button2
             // 
-            this.button1.Location = new System.Drawing.Point(688, 6);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(74, 23);
-            this.button1.TabIndex = 17;
-            this.button1.Text = "Refresh";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(70, 316);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(204, 15);
-            this.label7.TabIndex = 16;
-            this.label7.Text = "Percentage of Token to be transferred";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(333, 288);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(148, 15);
-            this.label6.TabIndex = 15;
-            this.label6.Text = "Destination Wallet Address";
-            this.label6.Click += new System.EventHandler(this.label6_Click);
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(333, 202);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(130, 15);
-            this.label5.TabIndex = 14;
-            this.label5.Text = "Original Wallet Address";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(333, 173);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(132, 15);
-            this.label4.TabIndex = 13;
-            this.label4.Text = "Telegram Bot Username";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(333, 144);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(110, 15);
-            this.label3.TabIndex = 12;
-            this.label3.Text = "Telegram Bot Token";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(70, 114);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(103, 15);
-            this.label2.TabIndex = 11;
-            this.label2.Text = "Update Frequency";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(70, 85);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(114, 15);
-            this.label1.TabIndex = 10;
-            this.label1.Text = "Check Interval Delay";
-            // 
-            // numPercentage
-            // 
-            this.numPercentage.Location = new System.Drawing.Point(20, 314);
-            this.numPercentage.Name = "numPercentage";
-            this.numPercentage.Size = new System.Drawing.Size(44, 23);
-            this.numPercentage.TabIndex = 9;
-            // 
-            // txtTargetWallet
-            // 
-            this.txtTargetWallet.Location = new System.Drawing.Point(20, 285);
-            this.txtTargetWallet.Name = "txtTargetWallet";
-            this.txtTargetWallet.Size = new System.Drawing.Size(307, 23);
-            this.txtTargetWallet.TabIndex = 8;
-            // 
-            // txtStartSeed
-            // 
-            this.txtStartSeed.Location = new System.Drawing.Point(20, 228);
-            this.txtStartSeed.Name = "txtStartSeed";
-            this.txtStartSeed.Size = new System.Drawing.Size(307, 23);
-            this.txtStartSeed.TabIndex = 7;
-            // 
-            // txtStartWallet
-            // 
-            this.txtStartWallet.Location = new System.Drawing.Point(20, 199);
-            this.txtStartWallet.Name = "txtStartWallet";
-            this.txtStartWallet.Size = new System.Drawing.Size(307, 23);
-            this.txtStartWallet.TabIndex = 6;
-            // 
-            // txtTelegramBotUsername
-            // 
-            this.txtTelegramBotUsername.Location = new System.Drawing.Point(20, 170);
-            this.txtTelegramBotUsername.Name = "txtTelegramBotUsername";
-            this.txtTelegramBotUsername.Size = new System.Drawing.Size(307, 23);
-            this.txtTelegramBotUsername.TabIndex = 5;
-            // 
-            // txtTelegramBotToken
-            // 
-            this.txtTelegramBotToken.Location = new System.Drawing.Point(20, 141);
-            this.txtTelegramBotToken.Name = "txtTelegramBotToken";
-            this.txtTelegramBotToken.Size = new System.Drawing.Size(307, 23);
-            this.txtTelegramBotToken.TabIndex = 4;
-            // 
-            // numStatusInterval
-            // 
-            this.numStatusInterval.Location = new System.Drawing.Point(20, 112);
-            this.numStatusInterval.Maximum = new decimal(new int[] {
-            600,
-            0,
-            0,
-            0});
-            this.numStatusInterval.Name = "numStatusInterval";
-            this.numStatusInterval.Size = new System.Drawing.Size(44, 23);
-            this.numStatusInterval.TabIndex = 3;
-            // 
-            // numCheckInterval
-            // 
-            this.numCheckInterval.Location = new System.Drawing.Point(20, 83);
-            this.numCheckInterval.Maximum = new decimal(new int[] {
-            600,
-            0,
-            0,
-            0});
-            this.numCheckInterval.Name = "numCheckInterval";
-            this.numCheckInterval.Size = new System.Drawing.Size(44, 23);
-            this.numCheckInterval.TabIndex = 2;
-            // 
-            // chkRunTest
-            // 
-            this.chkRunTest.AutoSize = true;
-            this.chkRunTest.Location = new System.Drawing.Point(20, 58);
-            this.chkRunTest.Name = "chkRunTest";
-            this.chkRunTest.Size = new System.Drawing.Size(169, 19);
-            this.chkRunTest.TabIndex = 1;
-            this.chkRunTest.Text = "Run on TestNet Rpc Servers";
-            this.chkRunTest.UseVisualStyleBackColor = true;
-            // 
-            // chkRunAsService
-            // 
-            this.chkRunAsService.AutoSize = true;
-            this.chkRunAsService.Location = new System.Drawing.Point(20, 33);
-            this.chkRunAsService.Name = "chkRunAsService";
-            this.chkRunAsService.Size = new System.Drawing.Size(103, 19);
-            this.chkRunAsService.TabIndex = 0;
-            this.chkRunAsService.Text = "Run As Service";
-            this.chkRunAsService.UseVisualStyleBackColor = true;
-            // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.grdRpcMain);
-            this.tabPage2.Location = new System.Drawing.Point(4, 24);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(768, 350);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Mainnet Rpc Urls";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // grdRpcMain
-            // 
-            this.grdRpcMain.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.grdRpcMain.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.grdRpcMain.Location = new System.Drawing.Point(20, 35);
-            this.grdRpcMain.Name = "grdRpcMain";
-            this.grdRpcMain.RowTemplate.Height = 25;
-            this.grdRpcMain.Size = new System.Drawing.Size(723, 177);
-            this.grdRpcMain.TabIndex = 0;
-            // 
-            // tabPage3
-            // 
-            this.tabPage3.Controls.Add(this.grdRpcTestnet);
-            this.tabPage3.Location = new System.Drawing.Point(4, 24);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(768, 350);
-            this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "Testnet Rpc Urls";
-            this.tabPage3.UseVisualStyleBackColor = true;
-            // 
-            // grdRpcTestnet
-            // 
-            this.grdRpcTestnet.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.grdRpcTestnet.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.grdRpcTestnet.Location = new System.Drawing.Point(20, 35);
-            this.grdRpcTestnet.Name = "grdRpcTestnet";
-            this.grdRpcTestnet.RowTemplate.Height = 25;
-            this.grdRpcTestnet.Size = new System.Drawing.Size(723, 177);
-            this.grdRpcTestnet.TabIndex = 1;
-            // 
-            // tabPage4
-            // 
-            this.tabPage4.Controls.Add(this.grdSacTokens);
-            this.tabPage4.Location = new System.Drawing.Point(4, 24);
-            this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(768, 350);
-            this.tabPage4.TabIndex = 3;
-            this.tabPage4.Text = "Native Tokens to Transfer";
-            this.tabPage4.UseVisualStyleBackColor = true;
-            // 
-            // grdSacTokens
-            // 
-            this.grdSacTokens.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.grdSacTokens.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.grdSacTokens.Location = new System.Drawing.Point(20, 35);
-            this.grdSacTokens.Name = "grdSacTokens";
-            this.grdSacTokens.RowTemplate.Height = 25;
-            this.grdSacTokens.Size = new System.Drawing.Size(723, 177);
-            this.grdSacTokens.TabIndex = 0;
-            // 
-            // tabPage5
-            // 
-            this.tabPage5.Controls.Add(this.grdClonedTokens);
-            this.tabPage5.Location = new System.Drawing.Point(4, 24);
-            this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Size = new System.Drawing.Size(768, 350);
-            this.tabPage5.TabIndex = 4;
-            this.tabPage5.Text = "Cloned Token Contract Address to Transfer";
-            this.tabPage5.UseVisualStyleBackColor = true;
-            // 
-            // grdClonedTokens
-            // 
-            this.grdClonedTokens.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.grdClonedTokens.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.grdClonedTokens.Location = new System.Drawing.Point(20, 35);
-            this.grdClonedTokens.Name = "grdClonedTokens";
-            this.grdClonedTokens.RowTemplate.Height = 25;
-            this.grdClonedTokens.Size = new System.Drawing.Size(723, 177);
-            this.grdClonedTokens.TabIndex = 0;
-            // 
-            // btnSave
-            // 
-            this.btnSave.Font = new System.Drawing.Font("Segoe UI", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnSave.Location = new System.Drawing.Point(16, 396);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(760, 42);
-            this.btnSave.TabIndex = 1;
-            this.btnSave.Text = "SAVE CONFIGURATION";
-            this.btnSave.UseVisualStyleBackColor = true;
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(333, 260);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(143, 15);
-            this.label9.TabIndex = 19;
-            this.label9.Text = "Original Wallet PrivateKey";
+            button2.Location = new Point(650, 165);
+            button2.Name = "button2";
+            button2.Size = new Size(110, 23);
+            button2.TabIndex = 21;
+            button2.Text = "Setup Telegram";
+            button2.UseVisualStyleBackColor = true;
+            button2.Click += button2_Click;
             // 
             // txtStartPrivateKey
             // 
-            this.txtStartPrivateKey.Location = new System.Drawing.Point(20, 257);
-            this.txtStartPrivateKey.Name = "txtStartPrivateKey";
-            this.txtStartPrivateKey.Size = new System.Drawing.Size(307, 23);
-            this.txtStartPrivateKey.TabIndex = 20;
+            txtStartPrivateKey.Location = new Point(20, 257);
+            txtStartPrivateKey.Name = "txtStartPrivateKey";
+            txtStartPrivateKey.Size = new Size(307, 23);
+            txtStartPrivateKey.TabIndex = 20;
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Location = new Point(333, 260);
+            label9.Name = "label9";
+            label9.Size = new Size(143, 15);
+            label9.TabIndex = 19;
+            label9.Text = "Original Wallet PrivateKey";
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Location = new Point(333, 231);
+            label8.Name = "label8";
+            label8.Size = new Size(151, 15);
+            label8.TabIndex = 18;
+            label8.Text = "Original Wallet Seed Phrase";
+            // 
+            // button1
+            // 
+            button1.Location = new Point(650, 6);
+            button1.Name = "button1";
+            button1.Size = new Size(112, 23);
+            button1.TabIndex = 17;
+            button1.Text = "Refresh";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Location = new Point(70, 316);
+            label7.Name = "label7";
+            label7.Size = new Size(204, 15);
+            label7.TabIndex = 16;
+            label7.Text = "Percentage of Token to be transferred";
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(333, 288);
+            label6.Name = "label6";
+            label6.Size = new Size(148, 15);
+            label6.TabIndex = 15;
+            label6.Text = "Destination Wallet Address";
+            label6.Click += label6_Click;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(333, 202);
+            label5.Name = "label5";
+            label5.Size = new Size(130, 15);
+            label5.TabIndex = 14;
+            label5.Text = "Original Wallet Address";
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(333, 173);
+            label4.Name = "label4";
+            label4.Size = new Size(132, 15);
+            label4.TabIndex = 13;
+            label4.Text = "Telegram Bot Username";
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(333, 144);
+            label3.Name = "label3";
+            label3.Size = new Size(110, 15);
+            label3.TabIndex = 12;
+            label3.Text = "Telegram Bot Token";
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(70, 114);
+            label2.Name = "label2";
+            label2.Size = new Size(149, 15);
+            label2.TabIndex = 11;
+            label2.Text = "Update Frequency Minutes";
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(70, 85);
+            label1.Name = "label1";
+            label1.Size = new Size(161, 15);
+            label1.TabIndex = 10;
+            label1.Text = "Check Interval Delay Seconds";
+            // 
+            // numPercentage
+            // 
+            numPercentage.Location = new Point(20, 314);
+            numPercentage.Name = "numPercentage";
+            numPercentage.Size = new Size(44, 23);
+            numPercentage.TabIndex = 9;
+            // 
+            // txtTargetWallet
+            // 
+            txtTargetWallet.Location = new Point(20, 285);
+            txtTargetWallet.Name = "txtTargetWallet";
+            txtTargetWallet.Size = new Size(307, 23);
+            txtTargetWallet.TabIndex = 8;
+            // 
+            // txtStartSeed
+            // 
+            txtStartSeed.Location = new Point(20, 228);
+            txtStartSeed.Name = "txtStartSeed";
+            txtStartSeed.Size = new Size(307, 23);
+            txtStartSeed.TabIndex = 7;
+            // 
+            // txtStartWallet
+            // 
+            txtStartWallet.Location = new Point(20, 199);
+            txtStartWallet.Name = "txtStartWallet";
+            txtStartWallet.Size = new Size(307, 23);
+            txtStartWallet.TabIndex = 6;
+            // 
+            // txtTelegramBotUsername
+            // 
+            txtTelegramBotUsername.Location = new Point(20, 170);
+            txtTelegramBotUsername.Name = "txtTelegramBotUsername";
+            txtTelegramBotUsername.Size = new Size(307, 23);
+            txtTelegramBotUsername.TabIndex = 5;
+            // 
+            // txtTelegramBotToken
+            // 
+            txtTelegramBotToken.Location = new Point(20, 141);
+            txtTelegramBotToken.Name = "txtTelegramBotToken";
+            txtTelegramBotToken.Size = new Size(307, 23);
+            txtTelegramBotToken.TabIndex = 4;
+            // 
+            // numStatusInterval
+            // 
+            numStatusInterval.Location = new Point(20, 112);
+            numStatusInterval.Maximum = new decimal(new int[] { 600, 0, 0, 0 });
+            numStatusInterval.Name = "numStatusInterval";
+            numStatusInterval.Size = new Size(44, 23);
+            numStatusInterval.TabIndex = 3;
+            // 
+            // numCheckInterval
+            // 
+            numCheckInterval.Location = new Point(20, 83);
+            numCheckInterval.Maximum = new decimal(new int[] { 600, 0, 0, 0 });
+            numCheckInterval.Name = "numCheckInterval";
+            numCheckInterval.Size = new Size(44, 23);
+            numCheckInterval.TabIndex = 2;
+            // 
+            // chkRunTest
+            // 
+            chkRunTest.AutoSize = true;
+            chkRunTest.Location = new Point(20, 58);
+            chkRunTest.Name = "chkRunTest";
+            chkRunTest.Size = new Size(169, 19);
+            chkRunTest.TabIndex = 1;
+            chkRunTest.Text = "Run on TestNet Rpc Servers";
+            chkRunTest.UseVisualStyleBackColor = true;
+            chkRunTest.CheckedChanged += chkRunTest_CheckedChanged;
+            // 
+            // chkRunAsService
+            // 
+            chkRunAsService.AutoSize = true;
+            chkRunAsService.Location = new Point(20, 33);
+            chkRunAsService.Name = "chkRunAsService";
+            chkRunAsService.Size = new Size(123, 19);
+            chkRunAsService.TabIndex = 0;
+            chkRunAsService.Text = "Exit After First Run";
+            chkRunAsService.UseVisualStyleBackColor = true;
+            // 
+            // tabPage2
+            // 
+            tabPage2.Controls.Add(grdRpcMain);
+            tabPage2.Location = new Point(4, 24);
+            tabPage2.Name = "tabPage2";
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(768, 350);
+            tabPage2.TabIndex = 1;
+            tabPage2.Text = "Mainnet Rpc Urls";
+            tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // grdRpcMain
+            // 
+            grdRpcMain.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            grdRpcMain.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            grdRpcMain.Location = new Point(20, 35);
+            grdRpcMain.Name = "grdRpcMain";
+            grdRpcMain.RowTemplate.Height = 25;
+            grdRpcMain.Size = new Size(723, 177);
+            grdRpcMain.TabIndex = 0;
+            // 
+            // tabPage3
+            // 
+            tabPage3.Controls.Add(grdRpcTestnet);
+            tabPage3.Location = new Point(4, 24);
+            tabPage3.Name = "tabPage3";
+            tabPage3.Size = new Size(768, 350);
+            tabPage3.TabIndex = 2;
+            tabPage3.Text = "Testnet Rpc Urls";
+            tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // grdRpcTestnet
+            // 
+            grdRpcTestnet.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            grdRpcTestnet.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            grdRpcTestnet.Location = new Point(20, 35);
+            grdRpcTestnet.Name = "grdRpcTestnet";
+            grdRpcTestnet.RowTemplate.Height = 25;
+            grdRpcTestnet.Size = new Size(723, 177);
+            grdRpcTestnet.TabIndex = 1;
+            // 
+            // tabPage4
+            // 
+            tabPage4.Controls.Add(grdSacTokens);
+            tabPage4.Location = new Point(4, 24);
+            tabPage4.Name = "tabPage4";
+            tabPage4.Size = new Size(768, 350);
+            tabPage4.TabIndex = 3;
+            tabPage4.Text = "Native Tokens to Transfer";
+            tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // grdSacTokens
+            // 
+            grdSacTokens.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            grdSacTokens.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            grdSacTokens.Location = new Point(20, 35);
+            grdSacTokens.Name = "grdSacTokens";
+            grdSacTokens.RowTemplate.Height = 25;
+            grdSacTokens.Size = new Size(723, 177);
+            grdSacTokens.TabIndex = 0;
+            // 
+            // tabPage5
+            // 
+            tabPage5.Controls.Add(grdClonedTokens);
+            tabPage5.Location = new Point(4, 24);
+            tabPage5.Name = "tabPage5";
+            tabPage5.Size = new Size(768, 350);
+            tabPage5.TabIndex = 4;
+            tabPage5.Text = "Cloned Token Contract Address to Transfer";
+            tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // grdClonedTokens
+            // 
+            grdClonedTokens.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            grdClonedTokens.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            grdClonedTokens.Location = new Point(20, 35);
+            grdClonedTokens.Name = "grdClonedTokens";
+            grdClonedTokens.RowTemplate.Height = 25;
+            grdClonedTokens.Size = new Size(723, 177);
+            grdClonedTokens.TabIndex = 0;
+            // 
+            // btnSave
+            // 
+            btnSave.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point);
+            btnSave.Location = new Point(16, 396);
+            btnSave.Name = "btnSave";
+            btnSave.Size = new Size(760, 42);
+            btnSave.TabIndex = 1;
+            btnSave.Text = "SAVE CONFIGURATION";
+            btnSave.UseVisualStyleBackColor = true;
+            btnSave.Click += btnSave_Click;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.btnSave);
-            this.Controls.Add(this.gridRpcTest);
-            this.Name = "Form1";
-            this.Text = "Pulsechain Wallet Mover Config";
-            this.gridRpcTest.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numPercentage)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numStatusInterval)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numCheckInterval)).EndInit();
-            this.tabPage2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.grdRpcMain)).EndInit();
-            this.tabPage3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.grdRpcTestnet)).EndInit();
-            this.tabPage4.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.grdSacTokens)).EndInit();
-            this.tabPage5.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.grdClonedTokens)).EndInit();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(800, 450);
+            Controls.Add(btnSave);
+            Controls.Add(gridRpcTest);
+            Name = "Form1";
+            Text = "Pulsechain Wallet Mover Config";
+            gridRpcTest.ResumeLayout(false);
+            tabPage1.ResumeLayout(false);
+            tabPage1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numPercentage).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numStatusInterval).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numCheckInterval).EndInit();
+            tabPage2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)grdRpcMain).EndInit();
+            tabPage3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)grdRpcTestnet).EndInit();
+            tabPage4.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)grdSacTokens).EndInit();
+            tabPage5.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)grdClonedTokens).EndInit();
+            ResumeLayout(false);
         }
 
         #endregion
@@ -457,5 +473,7 @@
         private DataGridView grdClonedTokens;
         private TextBox txtStartPrivateKey;
         private Label label9;
+        private Button button3;
+        private Button button2;
     }
 }
